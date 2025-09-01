@@ -1,117 +1,97 @@
-📌 Automacao de Navegacao e Download de Arquivos com Selenium
+# RPA para Download em Massa de Documentos de Contratos
 
-📖 Sobre o Projeto
+![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)
+![Libraries](https://img.shields.io/badge/Libraries-Selenium%20%7C%20Pandas-blue)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 
-Este projeto automatiza a navegação e a extração de arquivos a partir de um sistema web utilizando Selenium. O script conecta-se a um navegador Chrome já aberto, busca informações de uma planilha do Excel e interage com o site para baixar arquivos de documentos relacionados aos instrumentos listados na planilha.
+## Descrição do Projeto
 
-🚀 Funcionalidades
+Este projeto é um robô de automação (RPA) desenvolvido em Python e Selenium, cuja finalidade é automatizar o download em massa de todos os documentos associados a uma lista de contratos ou convênios de um portal web.
 
-Conexão com um navegador Chrome já aberto.
+O script lê uma lista de "Instrumentos" de uma planilha Excel, cria uma estrutura de pastas local e, para cada instrumento, navega até a sua respectiva área no portal, percorre todas as páginas de contratos relacionados e baixa sistematicamente todos os arquivos disponíveis, organizando-os automaticamente nas pastas criadas.
 
-Leitura de dados a partir de uma planilha Excel.
+## Funcionalidades Principais
 
-Navegação automática dentro do sistema web.
+-   **Download em Massa e Organização Automática:** Baixa múltiplos arquivos de diferentes páginas e os organiza em diretórios nomeados de acordo com o instrumento, eliminando a necessidade de trabalho manual.
 
-Download de arquivos relacionados a cada instrumento.
+-   **Técnicas Avançadas de Selenium:**
+    -   **Prevenção de `StaleElementReferenceException`:** Re-identifica dinamicamente os elementos da página dentro de loops, uma técnica essencial para interagir com interfaces que se atualizam após cada ação (como clicar em "Voltar").
+    -   **Detecção Inteligente de Downloads:** Identifica o arquivo recém-baixado comparando o conteúdo do diretório de downloads antes e depois da ação de clique, uma solução robusta para quando os nomes dos arquivos não são conhecidos previamente.
 
-Organização dos arquivos baixados em pastas específicas.
+-   **Mecanismo de Paginação:** Detecta automaticamente o número de páginas em uma lista de resultados e itera sobre todas elas, garantindo que nenhum contrato ou documento seja esquecido.
 
-🛠 Tecnologias Utilizadas
+-   **Conexão com Navegador Existente:** Conecta-se a uma sessão do Google Chrome em modo de depuração, permitindo que o usuário realize o login e a autenticação manualmente antes de iniciar a automação.
 
-Python (3.x)
+-   **Logging Estruturado:** Todas as ações, sucessos e erros são registrados em um arquivo de log (`downloader_log.txt`), fornecendo um histórico detalhado para auditoria e depuração.
 
-Selenium para automação do navegador.
+## Pré-requisitos
 
-Pandas para manipulação de planilhas Excel.
+-   [Python 3.7](https://www.python.org/downloads/) ou superior
+-   [Google Chrome](https://www.google.com/chrome/) (navegador web)
 
-Webdriver Manager para gestão automática do ChromeDriver.
+## Instalação e Configuração
 
-📂 Estrutura do Projeto
+1.  **Clone o repositório:**
+    ```bash
+    git clone [https://github.com/seu-usuario/seu-repositorio.git](https://github.com/seu-usuario/seu-repositorio.git)
+    cd seu-repositorio
+    ```
 
-/
-├── main.py                   # Script principal
-├── requirements.txt          # Lista de dependências
-└── README.md                 # Este arquivo
+2.  **Crie um ambiente virtual (recomendado):**
+    ```bash
+    # Windows
+    python -m venv venv
+    .\venv\Scripts\activate
+    ```
 
-🔧 Configuração e Execução
+3.  **Instale as dependências:**
+    Crie um arquivo `requirements.txt` com o seguinte conteúdo:
+    ```
+    pandas
+    openpyxl
+    selenium
+    webdriver-manager
+    ```
+    Em seguida, instale as bibliotecas:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-1️⃣ Instalação das Dependências
+4.  **Configure os Caminhos:**
+    Abra o script Python e edite o dicionário `CONFIG` no início do arquivo. **Esta é a etapa mais importante.**
+    ```python
+    CONFIG: Dict[str, Any] = {
+        "chrome_debug_port": "9222",
+        "input_file": r"C:\Caminho\Completo\Para\Sua\planilha_de_entrada.xlsx",
+        "downloads_dir": r"C:\Caminho\Completo\Para\Sua\pasta_de_downloads_padrao",
+        "output_dir": r"C:\Caminho\Completo\Para\onde\as_pastas_dos_contratos_serao_criadas"
+    }
+    ```
 
-Antes de executar o script, instale os pacotes necessários utilizando o comando:
+## Como Executar
 
-pip install -r requirements.txt
+1.  **Prepare a Planilha de Entrada:**
+    Garanta que o arquivo Excel especificado em `input_file` exista e contenha uma coluna chamada `"Instrumento nº"`.
 
-2️⃣ Inicie o Chrome com Depuração Remota
+2.  **Inicie o Google Chrome em Modo de Depuração:**
+    Feche todas as janelas do Chrome e inicie uma nova através do terminal com o comando abaixo.
+    ```bash
+    # Windows (ajuste o caminho se necessário)
+    "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222
+    ```
 
-Abra o terminal e execute o seguinte comando para iniciar o Chrome com depuração remota:
+3.  **Acesse o Sistema Manualmente:**
+    Na janela do Chrome que abriu, navegue até o portal, faça seu login e deixe-o pronto na página principal.
 
-chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\\chrome_debug"
+4.  **Execute o Script:**
+    Abra um terminal na pasta do projeto e execute o script:
+    ```bash
+    python nome_do_script.py
+    ```
+    O robô começará a criar as pastas e a baixar os arquivos. Acompanhe o progresso pelo console ou pelo arquivo `downloader_log.txt`.
 
-3️⃣ Execute o Script
+## Observações Importantes
 
-Após configurar o Chrome, execute o script com:
+> **Fragilidade dos Seletores (XPath):** Os seletores XPath utilizados neste script são absolutos e podem quebrar se a estrutura do site for alterada. Para uma automação mais duradoura, é fortemente recomendado substituí-los por seletores mais robustos (como IDs, classes ou XPaths relativos).
 
-python main.py
-
-⚙️ Principais Funções do Código
-
-🛠 Conectar ao navegador existente
-
-def conectar_navegador_existente():
-    options = webdriver.ChromeOptions()
-    options.debugger_address = "localhost:9222"
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-    return driver
-
-Conecta-se a uma instância do Chrome já aberta.
-
-📂 Leitura da Planilha
-
-def ler_planilha(arquivo):
-    df = pd.read_excel(arquivo, engine="openpyxl")
-    df["Instrumento nº"] = df["Instrumento nº"].astype(str).str.replace(r"\.0$", "", regex=True)
-    return df
-
-Lê os dados de uma planilha Excel e faz o tratamento de formatação na coluna "Instrumento nº".
-
-🔄 Navegação no Sistema
-
-def navegar_menu_principal(driver, instrumento):
-    esperar_elemento(driver, "XPATH_DO_ELEMENTO").click()
-    # Código para pesquisa do instrumento
-
-Interage com o menu do site para buscar os instrumentos.
-
-📄 Download de Arquivos
-
-def executar_acoes_detalhar(driver, pasta_instrumento):
-    # Localiza os botões "Detalhar", acessa a página e baixa arquivos
-
-Identifica os botões de "Detalhar", acessa as páginas correspondentes e baixa arquivos.
-
-🛑 Possíveis Erros e Soluções
-
-Erro
-
-Solução
-
-selenium.common.exceptions.WebDriverException
-
-Certifique-se de que o Chrome está aberto com depuração remota ativada.
-
-pandas.errors.ParserError
-
-Verifique se o arquivo Excel está no formato correto.
-
-TimeoutException
-
-Aumente o tempo de espera em WebDriverWait.
-
-📜 Licença
-
-Este projeto é de código aberto sob a licença MIT. Sinta-se à vontade para usá-lo e modificá-lo conforme necessário.
-
-📩 Contato
-
-Caso tenha dúvidas ou sugestões, entre em contato pelo e-mail: debrito521@gmail.com.
-
+> **Ajuste de `time.sleep()`:** O script utiliza pausas fixas (`time.sleep()`). Em conexões de internet mais lentas ou sistemas mais sobrecarregados, pode ser necessário aumentar a duração dessas pausas para garantir que as páginas carreguem completamente.
